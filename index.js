@@ -443,7 +443,6 @@ client.on("messageCreate", async (message) => {
     "gimana pakenya",
     "cara pake",
     "gimana caranya",
-    "help"
   ];
 
   const isHelpQuestion = helpKeywords.some((keyword) => content.includes(keyword));
