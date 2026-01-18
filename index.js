@@ -8,6 +8,7 @@ const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
   ],
 });
 client.commands = new Collection();
@@ -441,8 +442,8 @@ client.on("messageCreate", async (message) => {
     "cara pakainya",
     "gimana pakenya",
     "cara pake",
-    "gimana caranya?",
-    "Gimana caranya"
+    "gimana caranya",
+    "help"
   ];
 
   const isHelpQuestion = helpKeywords.some((keyword) => content.includes(keyword));
@@ -473,7 +474,13 @@ client.on("messageCreate", async (message) => {
       )
       .setFooter({ text: "🐎 Good luck with your bets!" });
 
-    await message.reply({ embeds: [helpEmbed] });
+    const helpReply = await message.reply({ embeds: [helpEmbed] });
+    
+    // Auto-delete after 30 seconds
+    setTimeout(() => {
+      helpReply.delete().catch(() => {});
+    }, 30000);
+    
     return;
   }
 
