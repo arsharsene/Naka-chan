@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1,
+    "name": "Rice Shower",
+    "odds": 6
+  },
+  {
+    "id": 2,
+    "name": "Sakura Bakushin O",
+    "odds": 3.4
+  },
+  {
+    "id": 3,
+    "name": "El Condor Pasa",
+    "odds": 3.2
+  },
+  {
+    "id": 4,
+    "name": "Fine Motion",
+    "odds": 4.9
+  },
+  {
+    "id": 5,
+    "name": "Matikanefukukitaru",
+    "odds": 8.1
+  },
+  {
+    "id": 6,
+    "name": "Special Week",
+    "odds": 2.5
+  }
+]

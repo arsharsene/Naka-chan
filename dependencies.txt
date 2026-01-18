@@ -1,0 +1,16 @@
+# Naka-chan Bot Dependencies
+# Run this command to install all required packages:
+
+npm install discord.js dotenv axios cheerio canvas
+
+# Or install individually:
+npm install discord.js@^14.25.1
+npm install dotenv@^17.2.3
+npm install axios@^1.13.2
+npm install cheerio@^1.1.2
+npm install canvas@^3.2.1
+
+# Note: Canvas may require additional system dependencies
+# Windows: Usually works out of the box
+# Linux: sudo apt-get install build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
+# Mac: brew install pkg-config cairo pango libpng jpeg giflib librsvg

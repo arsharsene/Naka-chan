@@ -1,0 +1,80 @@
+[
+  {
+    "id": 1,
+    "name": "Meiner Celerius",
+    "odds": 68.3,
+    "fav": 12
+  },
+  {
+    "id": 2,
+    "name": "Satono Glanz",
+    "odds": 22.7,
+    "fav": 9
+  },
+  {
+    "id": 3,
+    "name": "Doctor Dolittle",
+    "odds": 106.1,
+    "fav": 13
+  },
+  {
+    "id": 4,
+    "name": "Allnatt",
+    "odds": 14.9,
+    "fav": 7
+  },
+  {
+    "id": 5,
+    "name": "Coachella Valley",
+    "odds": 7.5,
+    "fav": 4
+  },
+  {
+    "id": 6,
+    "name": "Goltzschtal",
+    "odds": 2.4,
+    "fav": 1
+  },
+  {
+    "id": 7,
+    "name": "Family Time",
+    "odds": 21.3,
+    "fav": 8
+  },
+  {
+    "id": 8,
+    "name": "Yamanin Bouclier",
+    "odds": 9.5,
+    "fav": 5
+  },
+  {
+    "id": 9,
+    "name": "Libyan Glass",
+    "odds": 24.6,
+    "fav": 11
+  },
+  {
+    "id": 10,
+    "name": "Submariner",
+    "odds": 14.6,
+    "fav": 6
+  },
+  {
+    "id": 11,
+    "name": "Shining Sword",
+    "odds": 7.3,
+    "fav": 2
+  },
+  {
+    "id": 12,
+    "name": "Lilac",
+    "odds": 7.4,
+    "fav": 3
+  },
+  {
+    "id": 13,
+    "name": "Meiner Chrysola",
+    "odds": 23.9,
+    "fav": 10
+  }
+]
