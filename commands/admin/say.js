@@ -9,11 +9,9 @@ module.exports = {
       // Send the message to the target channel
       await targetChannel.send(message);
 
-      // Reply to the admin (ephemeral so only they see it)
-      await interaction.reply({
-        content: `✅ Message sent to <#${targetChannel.id}>!`,
-        flags: 64, // Ephemeral
-      });
+      // Silently acknowledge (no visible response)
+      await interaction.deferReply({ flags: 64 });
+      await interaction.deleteReply();
     } catch (error) {
       console.error("Error sending message:", error);
       await interaction.reply({
