@@ -441,6 +441,8 @@ client.on("messageCreate", async (message) => {
     "cara pakainya",
     "gimana pakenya",
     "cara pake",
+    "gimana caranya?",
+    "Gimana caranya"
   ];
 
   const isHelpQuestion = helpKeywords.some((keyword) => content.includes(keyword));
@@ -456,6 +458,7 @@ client.on("messageCreate", async (message) => {
         { name: "🎰 **Betting Commands**", value: 
           "`/joinrace` - Lihat detail race dan daftar kuda\n" +
           "`/bet <horse> <amount>` - Pasang taruhan\n" +
+          "`/help` - User dashboard\n" +
           "`/simbet <horse> <amount>` - Taruhan di simulation race\n" +
           "`/mybets` - Lihat history taruhan kamu"
         },
@@ -476,7 +479,7 @@ client.on("messageCreate", async (message) => {
 
   // Check if the bot was mentioned
   if (message.mentions.has(client.user)) {
-    await message.reply("apa tag-tag gw? lu mau judi? sini serahin carrats lo! ketik /joinrace untuk juday");
+    await message.reply("apa tag-tag gw? lu mau judi? sini serahin carrats lo! ketik /joinrace untuk gamble!");
   }
 });
 
