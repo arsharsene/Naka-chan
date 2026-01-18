@@ -20,6 +20,21 @@ module.exports = {
     const user = shared.getUser(interaction.user.id);
     const currentBet = shared.bets[interaction.user.id];
 
+    // If user already has a bet, show their current bet instead
+    if (currentBet) {
+      const potentialWin = Math.floor(currentBet.amount * currentBet.horse.odds);
+      return interaction.reply({
+        content: 
+          `❌ **You already have an active bet!**\n\n` +
+          `🐎 **Horse:** ${currentBet.horse.name}\n` +
+          `💰 **Amount:** 🥕 ${currentBet.amount.toLocaleString()}\n` +
+          `📈 **Odds:** ${currentBet.horse.odds}x\n` +
+          `🏆 **Potential Win:** 🥕 ${potentialWin.toLocaleString()}\n\n` +
+          `Use \`EXIT RACE\` button to cancel and refund your bet first.`,
+        flags: 64,
+      });
+    }
+
     // Create horse options for dropdown
     const horseOptions = shared.horses.map((h) => ({
       label: `#${h.id} ${h.name}`,
@@ -33,12 +48,9 @@ module.exports = {
       .setTitle("🎰 Place Your Bet")
       .setDescription(
         `**Your Balance:** 🥕 ${user.balance.toLocaleString()} carrats\n\n` +
-        (currentBet 
-          ? `**Current Bet:** ${currentBet.horse.name} — 🥕 ${currentBet.amount.toLocaleString()}\n\n`
-          : "") +
         `━━━━━━━━━━━━━━━━━━━━━━━━\n` +
         `**Step 1:** Select a horse below\n` +
-        `**Step 2:** Enter bet amount with \`/bet\``
+        `**Step 2:** Choose bet amount`
       )
       .setFooter({ text: "Select a horse to see its details" });
 

@@ -25,7 +25,7 @@ module.exports = {
     } catch (e) {
       // If can't delete, just reply
       await interaction.reply({
-        content: "🚪 **Dashboard closed.** You have exited the race." + (bet ? ` Your bet of 🥕 ${bet.amount} has been refunded.` : ""),
+        content: "🚪 **Dashboard closed.** You have exited the race." + (bet ? ` Your bet of 🥕 ${bet.amount.toLocaleString()} has been refunded.` : ""),
         flags: 64,
       }).catch(() => {});
     }

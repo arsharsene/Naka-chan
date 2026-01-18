@@ -22,12 +22,12 @@ module.exports = {
       .addFields(
         {
           name: "🥕 Balance",
-          value: `${user.balance}`,
+          value: `${user.balance.toLocaleString()}`,
           inline: true,
         },
         {
           name: "🎯 Active Bet",
-          value: bet ? `${bet.horse.name} · 🥕 ${bet.amount}` : "— none —",
+          value: bet ? `${bet.horse.name} · 🥕 ${bet.amount.toLocaleString()}` : "— none —",
           inline: true,
         },
         {

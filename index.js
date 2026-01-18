@@ -172,6 +172,22 @@ client.on("interactionCreate", async (interaction) => {
 
       // Horse selection for betting
       else if (customId === "bet_select_horse") {
+        // Check if user already has a bet
+        const existingBet = shared.bets[interaction.user.id];
+        if (existingBet) {
+          const potentialWin = Math.floor(existingBet.amount * existingBet.horse.odds);
+          return interaction.reply({
+            content: 
+              `❌ **You already have an active bet!**\n\n` +
+              `🐎 **Horse:** ${existingBet.horse.name}\n` +
+              `💰 **Amount:** 🥕 ${existingBet.amount.toLocaleString()}\n` +
+              `📈 **Odds:** ${existingBet.horse.odds}x\n` +
+              `🏆 **Potential Win:** 🥕 ${potentialWin.toLocaleString()}\n\n` +
+              `Use \`EXIT RACE\` button to cancel and refund your bet first.`,
+            flags: 64,
+          });
+        }
+
         const horseId = parseInt(interaction.values[0]);
         const horse = shared.horses.find((h) => h.id === horseId);
 

@@ -13,6 +13,15 @@ module.exports = {
       });
     }
 
+    // Check if user already has a bet
+    if (shared.bets[userId]) {
+      const existingBet = shared.bets[userId];
+      return interaction.reply({
+        content: `❌ You already placed a bet on **${existingBet.horse.name}** for 🥕 ${existingBet.amount.toLocaleString()}!\n\nUse \`EXIT RACE\` button to cancel and refund your bet first.`,
+        flags: 64,
+      });
+    }
+
     if (shared.isAfterDeparture() || shared.raceClosed) {
       return interaction.reply({
         content: "❌ Betting closed.",

@@ -174,6 +174,8 @@ npm install discord.js dotenv axios cheerio canvas
 | `/setracedetail` | Configure race details                         |
 | `/setwinner`     | Declare the winning horse & distribute payouts |
 | `/simrace`       | Run an animated simulation race                |
+| `/say`           | Make the bot send a message to any channel     |
+| `/clean`         | Delete messages in channel (1-100)             |
 
 ### 🌐 How to Import Races from Netkeiba
 

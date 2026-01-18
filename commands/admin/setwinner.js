@@ -34,25 +34,16 @@ module.exports = {
         const payout = Math.floor(bet.amount * winner.odds);
         shared.users[oddsUserId].balance += payout;
         totalPaid += payout;
-        winners.push(`<@${oddsUserId}> won 🥕 ${payout}`);
-
-        shared.users[oddsUserId].bets?.forEach((b) => {
-          if (b.result === "pending") {
-            b.result = "win";
-            b.payout = payout;
-          }
-        });
-      } else {
-        shared.users[oddsUserId].bets?.forEach((b) => {
-          if (b.result === "pending") {
-            b.result = "lose";
-            b.payout = 0;
-          }
-        });
+        winners.push(`<@${oddsUserId}> won 🥕 ${payout.toLocaleString()}`);
       }
     }
 
     shared.saveUsers();
+
+    // Clear all bets and joined users for next race
+    Object.keys(shared.bets).forEach((key) => delete shared.bets[key]);
+    shared.joinedUsers.clear();
+    shared.saveBets();
 
     const embed = new EmbedBuilder()
       .setColor(0xf1c40f)
@@ -65,7 +56,7 @@ module.exports = {
             : "😔 No one won this race.")
       )
       .addFields(
-        { name: "💰 Total Paid", value: `🥕 ${totalPaid}`, inline: true },
+        { name: "💰 Total Paid", value: `🥕 ${totalPaid.toLocaleString()}`, inline: true },
         {
           name: "📊 Total Bets",
           value: `${Object.keys(shared.bets).length}`,

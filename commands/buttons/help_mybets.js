@@ -7,7 +7,7 @@ module.exports = {
     const userId = interaction.user.id;
     const userBet = shared.bets[userId];
 
-    // Check if user has a bet (it's a single object, not array)
+    // Check if user has a bet
     if (!userBet) {
       return interaction.reply({
         content: "📋 You haven't placed any bets yet!",

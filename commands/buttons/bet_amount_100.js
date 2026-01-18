@@ -25,6 +25,15 @@ async function placeBet(interaction, amount) {
     });
   }
 
+  // Check if user already has a bet
+  if (shared.bets[userId]) {
+    const existingBet = shared.bets[userId];
+    return interaction.reply({
+      content: `❌ You already placed a bet on **${existingBet.horse.name}** for 🥕 ${existingBet.amount.toLocaleString()}!\n\nUse \`EXIT RACE\` button to cancel and refund your bet first.`,
+      flags: 64,
+    });
+  }
+
   const user = shared.getUser(userId);
   const horseId = shared.pendingBets[userId].horseId;
   const horse = shared.horses.find((h) => h.id === horseId);
@@ -50,7 +59,7 @@ async function placeBet(interaction, amount) {
     });
   }
 
-  // Place the bet
+  // Place the bet (single bet per user)
   user.balance -= amount;
   shared.bets[userId] = { horse, amount, horseId: horse.id };
   shared.saveUsers();

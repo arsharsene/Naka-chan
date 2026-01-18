@@ -201,6 +201,36 @@ const commands = [
         .setDescription("Netkeiba race URL (e.g., https://en.netkeiba.com/race/shutuba.html?race_id=...)")
         .setRequired(true)
     ),
+
+  // ================= SAY COMMAND =================
+  new SlashCommandBuilder()
+    .setName("say")
+    .setDescription("ADMIN: Make the bot say something")
+    .addStringOption((o) =>
+      o
+        .setName("message")
+        .setDescription("The message you want the bot to say")
+        .setRequired(true)
+    )
+    .addChannelOption((o) =>
+      o
+        .setName("channel")
+        .setDescription("Channel to send the message (optional)")
+        .setRequired(false)
+    ),
+
+  // ================= CLEAN COMMAND =================
+  new SlashCommandBuilder()
+    .setName("clean")
+    .setDescription("ADMIN: Delete messages in channel")
+    .addIntegerOption((o) =>
+      o
+        .setName("amount")
+        .setDescription("Number of messages to delete (1-100)")
+        .setRequired(true)
+        .setMinValue(1)
+        .setMaxValue(100)
+    ),
 ];
 
 const rest = new REST({ version: "10" }).setToken(process.env.BOT_TOKEN);
