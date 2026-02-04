@@ -485,7 +485,7 @@ client.on("messageCreate", async (message) => {
 
   // Check if the bot was mentioned
   if (message.mentions.has(client.user)) {
-    await message.reply("apa tag-tag gw? lu mau judi? sini serahin carrats lo! ketik /joinrace untuk gamble!");
+    await message.reply("hi sayang <3 kenapa tag-tag aku? mau judi? ketik /help ya");
   }
 });
 
