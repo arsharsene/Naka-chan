@@ -32,33 +32,21 @@ Whether you're here because you love Uma Musume, you have a gambling addiction (
 
 ## ✨ Features
 
-<table>
-<tr>
-<td width="50%">
-
-### 🎰 **Betting System**
+### 🎰 Betting System
 
 - Place bets on your favorite horses
 - Dynamic odds system
 - All-in mode for the brave (or stupid)!
 - Simulation races with Uma Musume characters
 
-</td>
-<td width="50%">
-
-### 💰 **Economy**
+### 💰 Economy
 
 - Daily 🥕 Carrats rewards (free money!)
 - Personal balance tracking
 - Server-wide leaderboards
 - Bet history (for when you need to cry)
 
-</td>
-</tr>
-<tr>
-<td width="50%">
-
-### 🤖 **Smart Response System**
+### 🤖 Smart Response System
 
 - Human-like conversations when mentioning the bot
 - Context-aware replies based on keywords
@@ -66,30 +54,20 @@ Whether you're here because you love Uma Musume, you have a gambling addiction (
 - Special personality responses
 - No external AI APIs needed!
 
-</td>
-<td width="50%">
-
-### 🏇 **Race Management**
+### 🏇 Race Management
 
 - **Import REAL races from netkeiba.com**
 - Add/remove horses with custom odds
 - Real-time race simulations
 - Beautiful animated race displays
 
-</td>
-<td width="50%">
-
-### 🛡️ **Admin Controls**
+### 🛡️ Admin Controls
 
 - Interactive admin dashboard
 - Per-server admin roles
 - Channel restrictions
 - Race announcer (30min reminder)
 - **Edit horse odds via popup modal**
-
-</td>
-</tr>
-</table>
 
 ---
 
