@@ -485,7 +485,11 @@ client.on("messageCreate", async (message) => {
 
   // Check if the bot was mentioned
   if (message.mentions.has(client.user)) {
-    await message.reply("hi sayang <3 kenapa tag-tag aku? mau judi? ketik /help ya");
+    const { getResponse } = require("./responses");
+    // Remove the mention from the message content
+    const cleanedMessage = message.content.replace(/<@!?\d+>/g, "").trim();
+    const response = getResponse(cleanedMessage);
+    await message.reply(response);
   }
 });
 

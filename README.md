@@ -58,6 +58,17 @@ Whether you're here because you love Uma Musume, you have a gambling addiction (
 <tr>
 <td width="50%">
 
+### 🤖 **Smart Response System**
+
+- Human-like conversations when mentioning the bot
+- Context-aware replies based on keywords
+- Varied greetings and reactions
+- Special personality responses
+- No external AI APIs needed!
+
+</td>
+<td width="50%">
+
 ### 🏇 **Race Management**
 
 - **Import REAL races from netkeiba.com**
@@ -227,6 +238,47 @@ https://en.netkeiba.com/race/shutuba.html?race_id=202608010711
 
 ---
 
+## 🤖 Smart Response System
+
+Naka-chan doesn't just respond to commands - she can **chat with you** too! Using a contextual keyword detection system, she'll reply with human-like, varied responses when you mention her.
+
+### How It Works
+
+Instead of relying on external AI APIs, Naka-chan uses a smart pattern-matching system (`responses.js`) that:
+
+1. **Detects context** from your message (keywords, emojis, patterns)
+2. **Selects appropriate response category** (greetings, betting, love, laughter, etc.)
+3. **Picks a random reply** from that category for variety
+4. **Maintains personality** with cute, playful, and sometimes sassy responses
+
+### Example Interactions
+
+| What You Say                       | How Naka-chan Responds                              |
+| ---------------------------------- | --------------------------------------------------- |
+| `@Naka-chan`                       | _"haii~ (≧▽≦) ada apa nih?"_                        |
+| `@Naka-chan mau bet nih`           | _"mau taruhan? semangat! ketik /joinrace ya~ 🐎✨"_ |
+| `@Naka-chan sayang kamu`           | _"aww makasih~ kamu juga! (｡♥‿♥｡)"_                 |
+| `@Naka-chan wkwkwk`                | _"WKWKWK bisa aja kamu~ 😂"_                        |
+| `@Naka-chan gimana cara pakainya?` | _Shows full help embed with commands_               |
+
+### Supported Contexts
+
+- 💬 **Greetings** - Friendly hellos and introductions
+- ❤️ **Love/Affection** - Sweet responses to compliments
+- 😂 **Laughter** - Playful reactions to jokes
+- 😢 **Sadness** - Comforting messages
+- 😡 **Anger** - Calming/apologetic responses
+- 🎰 **Betting** - Racing and gambling related replies
+- 🙏 **Thanks** - Appreciative acknowledgments
+- ❓ **Questions** - Helpful redirects to `/help`
+- 🐎 **Horses** - Uma Musume enthusiasm!
+- 🍔 **Food** - Carrot obsession 🥕
+- 👋 **Goodbyes** - Friendly farewells
+
+> 🎭 **Pro Tip:** Try mentioning Naka-chan with different keywords or emotions and see how she responds!
+
+---
+
 ## 🏗️ Project Structure
 
 ```
@@ -238,6 +290,7 @@ naka-chan/
 │   └── 📄 shared.js      # Shared utilities & data
 ├── 📁 data/              # Persistent data storage (Uma Musume characters!)
 ├── 📄 index.js           # Main bot entry point
+├── 📄 responses.js       # Smart response system for bot mentions
 ├── 📄 scraper.js         # Netkeiba.com race scraper
 ├── 📄 announcer.js       # Race announcement system
 ├── 📄 deploy-commands.js # Slash command deployment
