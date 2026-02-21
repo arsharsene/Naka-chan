@@ -57,6 +57,26 @@ client.once("ready", () => {
 
 // ================= INTERACTIONS =================
 client.on("interactionCreate", async (interaction) => {
+  // ---------- CHANNEL RESTRICTION ----------
+  if (interaction.guildId) {
+    const shared = require("./commands/shared");
+    const isSetup =
+      (interaction.isChatInputCommand() && interaction.commandName === "setup") ||
+      (interaction.customId && interaction.customId.startsWith("setup_"));
+
+    if (!isSetup && !shared.isAllowedChannel(interaction.guildId, interaction.channelId)) {
+      const settings = shared.getGuildSettings(interaction.guildId);
+      const channelList = settings.allowedChannels.map((id) => `<#${id}>`).join(", ");
+      if (!interaction.replied && !interaction.deferred) {
+        return interaction.reply({
+          content: `❌ This bot can only be used in: ${channelList}`,
+          flags: 64,
+        });
+      }
+      return;
+    }
+  }
+
   // ---------- SLASH COMMANDS ----------
   if (interaction.isChatInputCommand()) {
     const command = client.commands.get(interaction.commandName);
@@ -430,6 +450,12 @@ client.on("interactionCreate", async (interaction) => {
 client.on("messageCreate", async (message) => {
   // Ignore messages from bots
   if (message.author.bot) return;
+
+  // Channel restriction check
+  if (message.guildId) {
+    const shared = require("./commands/shared");
+    if (!shared.isAllowedChannel(message.guildId, message.channelId)) return;
+  }
 
   const content = message.content.toLowerCase();
 

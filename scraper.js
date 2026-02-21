@@ -209,176 +209,129 @@ async function scrapeRace(raceUrl) {
 }
 
 /**
- * Scrape horse list from netkeiba newspaper page (full form)
- * This page has cleaner horse name links
+ * Scrape horse list from netkeiba using Playwright to handle dynamic JS (Odds & Fav)
  */
 async function scrapeHorses(raceUrl) {
   try {
     const raceId = extractRaceId(raceUrl);
     if (!raceId) throw new Error("Invalid netkeiba URL");
 
-    // Use newspaper page which has cleaner horse links
-    const url = `${BASE_URL}/race/newspaper.html?race_id=${raceId}`;
-    const { data } = await axios.get(url, {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        "Accept-Language": "en-US,en;q=0.9",
-      },
-      timeout: 30000,
+    const playwright = require("playwright");
+    console.log("Launching Playwright browser...");
+    const browser = await playwright.chromium.launch({ headless: true });
+    
+    // First, try visiting the newspaper page to get a clean horse list
+    const newspaperUrl = `${BASE_URL}/race/newspaper.html?race_id=${raceId}`;
+    let context = await browser.newContext({
+      userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
     });
-
-    const $ = cheerio.load(data);
-    const horses = [];
-    const seenHorses = new Set();
-
-    // Find all horse links (format: /db/horse/XXXXXXXXXX/)
-    $('a[href*="/db/horse/"]').each((index, element) => {
-      const $link = $(element);
-      const horseName = $link.text().trim();
-      const href = $link.attr("href");
-
-      // Skip if not a valid horse name
-      if (!horseName || horseName.length < 2 || horseName.includes("Movie")) return;
-      if (horseName.match(/^\d+$/) || horseName.match(/^[A-Z]\d+$/)) return;
+    
+    let page = await context.newPage();
+    console.log("Navigating to newspaper page:", newspaperUrl);
+    await page.goto(newspaperUrl, { waitUntil: "domcontentloaded", timeout: 30000 });
+    
+    // Evaluate in browser context to extract clean horse names
+    const horses = await page.evaluate(() => {
+      const results = [];
+      const seen = new Set();
+      const horseLinks = document.querySelectorAll('a[href*="/db/horse/"]');
       
-      // Skip race names (they are usually longer than horse names)
-      if (horseName.includes("Stakes") || horseName.includes("Cup") || horseName.includes("Sho") || 
-          horseName.includes("Kinen") || horseName.includes("Hai") || horseName.includes("Tokubetsu") ||
-          horseName.includes("Handicap") || horseName.includes("Trophy") || horseName.includes("Alw")) return;
-
-      // Skip duplicates
-      if (seenHorses.has(horseName)) return;
-      seenHorses.add(horseName);
-
-      horses.push({
-        id: horses.length + 1,
-        name: horseName,
-        odds: 10.0, // Default odds since they're loaded dynamically
-        fav: horses.length + 1,
-      });
-    });
-
-    // If we found fewer than 5 horses, try alternate method
-    if (horses.length < 5) {
-      console.log("Trying alternate horse scraping method...");
-      
-      // Try shutuba page
-      const shutubaUrl = `${BASE_URL}/race/shutuba.html?race_id=${raceId}`;
-      const { data: shutubaData } = await axios.get(shutubaUrl, {
-        headers: {
-          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-          "Accept-Language": "en-US,en;q=0.9",
-        },
-        timeout: 30000,
-      });
-      
-      const $2 = cheerio.load(shutubaData);
-      const altHorses = [];
-      const altSeen = new Set();
-      
-      // Try multiple selectors
-      $2('a[href*="/db/horse/"]').each((index, element) => {
-        const $link = $2(element);
-        const horseName = $link.text().trim();
+      horseLinks.forEach(link => {
+        const horseName = link.textContent.trim();
+        if (!horseName || horseName.length < 2 || horseName.includes("Movie")) return;
+        if (horseName.match(/^\d+$/) || horseName.match(/^[A-Z]\d+$/)) return;
+        if (horseName.match(/Stakes|Cup|Sho|Kinen|Hai|Tokubetsu|Handicap|Trophy|Alw/i)) return;
         
-        if (!horseName || horseName.length < 2) return;
-        if (altSeen.has(horseName)) return;
+        if (seen.has(horseName)) return;
+        seen.add(horseName);
         
-        // Skip non-horse links
-        if (horseName.match(/Movie|Stakes|Cup|Sho|Kinen|Hai|Tokubetsu/i)) return;
-        
-        altSeen.add(horseName);
-        altHorses.push({
-          id: altHorses.length + 1,
+        results.push({
+          id: results.length + 1,
           name: horseName,
           odds: 10.0,
-          fav: altHorses.length + 1,
+          fav: results.length + 1,
         });
       });
-      
-      if (altHorses.length > horses.length) {
-        return altHorses;
-      }
-    }
+      return results;
+    });
 
-    // Fetch odds and fav from shutuba page (td.Popular and td.Fav)
-    try {
-      const shutubaUrl = `${BASE_URL}/race/shutuba.html?race_id=${raceId}`;
-      const { data: shutubaData } = await axios.get(shutubaUrl, {
-        headers: {
-          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-          "Accept-Language": "en-US,en;q=0.9",
-        },
-        timeout: 30000,
-      });
+    console.log(`Found ${horses.length} horses from newspaper page.`);
+    await page.close();
+
+    // Now visit shutuba to get dynamic odds and favs
+    const shutubaUrl = `${BASE_URL}/race/shutuba.html?race_id=${raceId}`;
+    page = await context.newPage();
+    console.log("Navigating to shutuba page for odds and fav:", shutubaUrl);
+    // Wait until networkidle to ensure odds are loaded completely!
+    await page.goto(shutubaUrl, { waitUntil: "networkidle", timeout: 60000 });
+    
+    const shutubaData = await page.evaluate((knownHorses) => {
+      const updates = {};
+      const rows = document.querySelectorAll("tr");
       
-      const $s = cheerio.load(shutubaData);
-      
-      // Parse each table row for odds and fav
-      let matchedCount = 0;
-      $s("tr").each((index, row) => {
-        const $row = $s(row);
+      rows.forEach(row => {
+        const popularCell = row.querySelector("td.Popular");
+        if (!popularCell) return;
         
-        // Check if this row has odds data (td.Popular)
-        const $popular = $row.find("td.Popular");
-        if (!$popular.length) return;
-        
-        // Find horse name from any link in this row
         let horseName = null;
-        $row.find("a").each((i, a) => {
-          const text = $s(a).text().trim();
-          // Match with our horses list
-          const match = horses.find(h => h.name === text);
-          if (match) {
+        const links = row.querySelectorAll("a");
+        links.forEach(a => {
+          const text = a.textContent.trim();
+          if (knownHorses.find(h => h.name === text)) {
             horseName = text;
-            return false; // break
           }
         });
         
         if (!horseName) return;
-        const horse = horses.find(h => h.name === horseName);
-        if (!horse) return;
         
-        matchedCount++;
-        
-        // Get odds from td.Popular
-        const popularText = $popular.text().trim();
-        const oddsMatch = popularText.match(/(\d+\.?\d*)/);
+        // Extract odds
+        let odds = 10.0;
+        const oddsMatch = popularCell.textContent.trim().match(/(\d+\.?\d*)/);
         if (oddsMatch) {
-          const parsedOdds = parseFloat(oddsMatch[1]);
-          if (parsedOdds > 0 && parsedOdds < 1000) {
-            horse.odds = parsedOdds;
+          const val = parseFloat(oddsMatch[1]);
+          if (val > 0 && val < 1000) odds = val;
+        }
+        
+        // Extract fav
+        let fav = 0;
+        const favCell = row.querySelector("td.Fav");
+        if (favCell) {
+          const favMatch = favCell.textContent.trim().match(/(\d+)/);
+          if (favMatch) {
+            const val = parseInt(favMatch[1]);
+            if (val > 0 && val <= 20) fav = val;
           }
         }
         
-        // Get fav from td.Fav
-        const $fav = $row.find("td.Fav");
-        if ($fav.length) {
-          const favText = $fav.text().trim();
-          const favMatch = favText.match(/(\d+)/);
-          if (favMatch) {
-            const parsedFav = parseInt(favMatch[1]);
-            if (parsedFav > 0 && parsedFav <= 20) {
-              horse.fav = parsedFav;
-            }
-          }
-        }
+        updates[horseName] = { odds, fav };
       });
-      
-      console.log(`Matched ${matchedCount} horses with shutuba odds/fav`);
-    } catch (oddsError) {
-      console.log("Could not fetch odds from shutuba page:", oddsError.message);
-    }
+      return updates;
+    }, horses);
+
+    // Apply updates
+    let matchedCount = 0;
+    horses.forEach(h => {
+      const update = shutubaData[h.name];
+      if (update) {
+        h.odds = update.odds;
+        if (update.fav) h.fav = update.fav;
+        else h.fav = h.id; // fallback if fav not found dynamically
+        matchedCount++;
+      }
+    });
+
+    console.log(`Matched ${matchedCount} horses with shutuba odds/fav via Playwright`);
+    await browser.close();
 
     console.log(`Final ${horses.length} horses:`, horses.map(h => `${h.name}: ${h.odds}x (fav ${h.fav})`).join(", "));
 
     return horses;
   } catch (error) {
-    console.error("Error scraping horses:", error.message);
+    console.error("Error scraping horses with Playwright:", error.message);
     throw error;
   }
 }
+
 
 /**
  * Scrape race result to get winner
