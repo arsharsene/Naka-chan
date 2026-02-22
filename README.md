@@ -2,7 +2,7 @@
 
 # 🐎 Naka-chan
 
-### _Uma Musume-Inspired Discord Horse Racing & Betting Bot_
+### _URA And JRA Discord Horse Racing & Betting Bot_
 
 [![Discord.js](https://img.shields.io/badge/Discord.js-v14-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.js.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-18+-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
@@ -138,7 +138,7 @@ npm install discord.js dotenv canvas playwright
 
 | Command                    | Description                             |
 | -------------------------- | --------------------------------------- |
-| `/help`                    | Your beautiful user dashboard           |
+| `/help`                    | User dashboard                          |
 | `/joinrace`                | View race details and horse lineup      |
 | `/bet <horse> <amount>`    | Place a bet (and pray)                  |
 | `/simbet <horse> <amount>` | Bet on simulation races                 |
@@ -174,13 +174,14 @@ Want to run **real JRA races** in your server? Here's how:
 **Step 2:** Find a race and copy the URL, for example:
 
 ```
-https://en.netkeiba.com/race/shutuba.html?race_id=202608010711
+https://en.netkeiba.com/race/shutuba.html?race_id=xxxxxx
 ```
 
 **Step 3:** Use the import command:
+Example:
 
 ```
-/importrace url:https://en.netkeiba.com/race/shutuba.html?race_id=202608010711
+/importrace url:https://en.netkeiba.com/race/shutuba.html?race_id=xxxxxx
 ```
 
 **What gets imported:**
@@ -189,7 +190,7 @@ https://en.netkeiba.com/race/shutuba.html?race_id=202608010711
 - 🐎 All horses in the race
 - ⏰ Departure time (auto-converted to WIB timezone)
 
-> ⚠️ **Note:** Odds are loaded dynamically on netkeiba.com via JavaScript, so they may show as 10.0x by default. Use `/admin` → **Edit Horse** button to manually update odds!
+> ⚠️ **Note:** Odds are loaded dynamically on netkeiba.com via JavaScript, so they may show as 10.0x by default.
 
 ---
 
@@ -200,16 +201,11 @@ https://en.netkeiba.com/race/shutuba.html?race_id=202608010711
 │                     🏁 RACE DAY FLOW                        │
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
-│   1️⃣ Admin imports race      ───►   Set horses & odds      │
-│                                                             │
+│   1️⃣ Admin imports race      ───►   Import from netkeiba   │
 │   2️⃣ Users place bets        ───►   /bet or /joinrace      │
-│                                                             │
 │   3️⃣ Race simulation runs    ───►   Animated race display  │
-│                                                             │
 │   4️⃣ Winner declared         ───►   Payouts distributed    │
-│                                                             │
 │   5️⃣ Leaderboard updates     ───►   Glory (or shame) 🏆    │
-│                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
 
