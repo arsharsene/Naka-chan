@@ -14,23 +14,34 @@ module.exports = {
     const rd = shared.raceDetail;
     const raceName = rd.raceName || "Race";
 
+    const horseLines = [...shared.horses]
+      .sort((a, b) => a.id - b.id)
+      .map((h) => {
+        const favBadge = h.fav === 1 ? "⭐ " : h.fav <= 3 ? "🔥 " : "";
+        const favRank = h.fav ? `${h.fav}` : "";
+        return `\`#${String(h.id).padStart(2, "0")}\` ${h.name} ─ \`${h.odds}x\` ─ ${favBadge}${favRank}`;
+      })
+      .join("\n");
+
     const embed = new EmbedBuilder()
       .setColor(0x1abc9c)
-      .setTitle(`🏁 ${raceName} · ${rd.grade}`)
+      .setAuthor({ name: `🏇 ${rd.venue || "—"} Racecourse` })
+      .setTitle(`🏁 ${rd.raceNo || ""} ${raceName}`)
       .setDescription(
-        `📍 **${rd.venue} ${rd.raceNo}**\n` +
-        `📅 **${rd.date}**\n` +
-        `🕒 **Departure:** ${rd.departure}\n` +
-        `${shared.countdown()}\n` +
-        `📏 **Distance:** ${rd.distance}\n\n`
+        `🏆 **Grade:** ${rd.grade || "—"}  ┃  📏 **${rd.distance}**\n` +
+        `📅 **${rd.date}**  ┃  🕐 **${rd.departure}**\n` +
+        `🌤️ **${rd.weather || "Sunny"}**   ┃  🌱 **${rd.condition || "Good"}**\n` +
+        `─────────────────────────\n` +
+        `**Countdown: ${shared.countdown()}**\n` +
+        `─────────────────────────\n` +
+        `**🐎 RUNNERS (${shared.horses.length})**\n` +
+        `\ ID\ ─ Horse ─ \ Odds\ ─ Fav\n` +
+        `─────────────────────────\n` +
+        horseLines
       )
-      .addFields({
-        name: "🐎 Horses & Odds",
-        value: shared.horses
-          .map((h) => `\`${h.id}\` **${h.name}** — **${h.odds}x**`)
-          .join("\n"),
-      })
-      .setFooter({ text: "Join to access betting dashboard" });
+      .setThumbnail(interaction.client.user.displayAvatarURL())
+      .setFooter({ text: "Join to access betting dashboard • ⭐ Favorite • 🔥 Top 3" })
+      .setTimestamp();
 
     const row = new ActionRowBuilder().addComponents(
       new ButtonBuilder()

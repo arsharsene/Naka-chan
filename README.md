@@ -118,16 +118,15 @@ GUILD_ID=your_server_id_here
 Install all dependencies with one command:
 
 ```bash
-npm install discord.js dotenv axios cheerio canvas
+npm install discord.js dotenv canvas playwright
 ```
 
-| Package    | Description                       |
-| ---------- | --------------------------------- |
-| discord.js | Discord API library               |
-| dotenv     | Environment variables loader      |
-| axios      | HTTP client for netkeiba scraping |
-| cheerio    | HTML parsing                      |
-| canvas     | Race animation images             |
+| Package    | Description                     |
+| ---------- | ------------------------------- |
+| discord.js | Discord API library             |
+| dotenv     | Environment variables loader    |
+| playwright | Browser automation for scraping |
+| canvas     | Race animation images           |
 
 > 📄 See `dependencies.txt` for detailed install commands and system requirements.
 

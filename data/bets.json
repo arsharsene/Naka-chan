@@ -1,1 +1,12 @@
-{}
+{
+  "319129763161702400": {
+    "horse": {
+      "id": 14,
+      "name": "Wilson Tesoro",
+      "odds": 6.1,
+      "fav": 3
+    },
+    "amount": 1000,
+    "horseId": 14
+  }
+}

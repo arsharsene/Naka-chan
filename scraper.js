@@ -1,5 +1,4 @@
-const axios = require("axios");
-const cheerio = require("cheerio");
+const playwright = require("playwright");
 
 const BASE_URL = "https://en.netkeiba.com";
 
@@ -20,20 +19,19 @@ async function scrapeRace(raceUrl) {
     if (!raceId) throw new Error("Invalid netkeiba URL");
 
     const url = `${BASE_URL}/race/shutuba.html?race_id=${raceId}`;
-    const { data } = await axios.get(url, {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        "Accept-Language": "en-US,en;q=0.9",
-      },
-      timeout: 30000,
+    console.log("Launching Playwright browser for race info...");
+    const browser = await playwright.chromium.launch({ headless: true });
+    const context = await browser.newContext({
+      userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     });
+    const page = await context.newPage();
+    await page.goto(url, { waitUntil: "commit", timeout: 30000 }).catch(e => console.log("goto issue:", e.message));
+    // Wait briefly for content to populate
+    await page.waitForTimeout(2000);
 
-    const $ = cheerio.load(data);
+    const data = await page.content();
+    const title = await page.title();
 
-    // Parse race info from title and page
-    // Title format: "NIKKEI SHINSHUN HAI (G2) Field | 18 JAN 2026 R11 Kyoto Racing Information (JRA) - netkeiba"
-    const title = $("title").text();
     console.log("Page title:", title);
     
     // Extract race name from title (before "|" or "(G#)")
@@ -41,7 +39,11 @@ async function scrapeRace(raceUrl) {
     let grade = "OP";
     
     // Try to get from RaceName class
-    const raceNameEl = $(".RaceName").text().trim();
+    const raceNameEl = await page.evaluate(() => {
+      const el = document.querySelector(".RaceName");
+      return el ? el.textContent.trim() : null;
+    });
+
     if (raceNameEl) {
       raceName = raceNameEl.replace(/\(G\d\)/gi, "").trim();
     } else {
@@ -102,33 +104,34 @@ async function scrapeRace(raceUrl) {
     const raceNo = raceNoMatch ? `R${raceNoMatch[1]}` : "R11";
     const raceNum = raceNoMatch ? raceNoMatch[1] : "11";
 
-    // Extract departure time (JST) using cheerio selectors
+    // Extract departure time (JST) using cheerio selectors -> converting to playwright eval
     let departureJST = null;
     
-    // Method 1: Look for the specific race link in navigation (contains R## and time)
-    // These appear as list items with race number and time
-    $('a').each((i, el) => {
-      if (departureJST) return;
-      const href = $(el).attr('href') || '';
-      const text = $(el).text().trim();
-      
-      // Match links to this specific race
-      if (href.includes(`race_id=${raceId}`) || href.includes(`race_id=${raceId}`)) {
-        // Look for time pattern in the link text or nearby elements
-        const timeMatch = text.match(/(\d{1,2}):(\d{2})/);
-        if (timeMatch) {
-          const h = parseInt(timeMatch[1]);
-          if (h >= 9 && h <= 17) {
-            departureJST = `${timeMatch[1].padStart(2, '0')}:${timeMatch[2]}`;
-            console.log(`Found time in link: ${departureJST}`);
+    departureJST = await page.evaluate(({ raceId, raceNum }) => {
+      let time = null;
+      // Method 1: Look for the specific race link in navigation (contains R## and time)
+      const links = document.querySelectorAll('a');
+      for (const el of links) {
+        const href = el.getAttribute('href') || '';
+        const text = el.textContent.trim();
+        if (href.includes(`race_id=${raceId}`) || href.includes(`race_id=${raceId}`)) {
+          const timeMatch = text.match(/(\d{1,2}):(\d{2})/);
+          if (timeMatch) {
+            const h = parseInt(timeMatch[1]);
+            if (h >= 9 && h <= 17) {
+              return `${timeMatch[1].padStart(2, '0')}:${timeMatch[2]}`;
+            }
           }
         }
       }
-    });
+      return null;
+    }, { raceId, raceNum });
     
-    // Method 2: Look for R11 links with time in navigation
+    if (departureJST) console.log(`Found time in link: ${departureJST}`);
+
+    // Method 2: Look for R11 links with time in text
     if (!departureJST) {
-      const fullText = $.text();
+      const fullText = await page.evaluate(() => document.body.innerText);
       // Pattern: R11 followed by time on same or next line
       const r11Pattern = new RegExp(`R${raceNum}[^0-9]*(\\d{1,2}):(\\d{2})`);
       const match = fullText.match(r11Pattern);
@@ -136,34 +139,31 @@ async function scrapeRace(raceUrl) {
         departureJST = `${match[1].padStart(2, '0')}:${match[2]}`;
         console.log(`Found R${raceNum} time in text: ${departureJST}`);
       }
-    }
-    
-    // Method 3: Find time near the race header info
-    if (!departureJST) {
-      // Look for text containing the race name and find time after it  
-      const fullText = $.text();
-      const raceNameIndex = fullText.toUpperCase().indexOf(raceName.toUpperCase());
-      if (raceNameIndex > -1) {
-        const afterRaceName = fullText.substring(raceNameIndex, raceNameIndex + 100);
-        const timeMatch = afterRaceName.match(/(\d{1,2}):(\d{2})/);
-        if (timeMatch) {
-          departureJST = `${timeMatch[1].padStart(2, '0')}:${timeMatch[2]}`;
-          console.log(`Found time after race name: ${departureJST}`);
+      
+      // Method 3: Find time near the race header info
+      if (!departureJST) {
+        const raceNameIndex = fullText.toUpperCase().indexOf(raceName.toUpperCase());
+        if (raceNameIndex > -1) {
+          const afterRaceName = fullText.substring(raceNameIndex, raceNameIndex + 100);
+          const timeMatch = afterRaceName.match(/(\d{1,2}):(\d{2})/);
+          if (timeMatch) {
+            departureJST = `${timeMatch[1].padStart(2, '0')}:${timeMatch[2]}`;
+            console.log(`Found time after race name: ${departureJST}`);
+          }
         }
       }
-    }
-    
-    // Method 4: Search for any time between 09:00 and 17:00 near race info
-    if (!departureJST) {
-      const fullText = $.text();
-      const allTimes = fullText.match(/\d{1,2}:\d{2}/g) || [];
-      for (const t of allTimes) {
-        const [h, m] = t.split(':').map(Number);
-        // R11 races are typically afternoon, 14:00-16:00
-        if (h >= 14 && h <= 16) {
-          departureJST = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-          console.log(`Found afternoon race time: ${departureJST}`);
-          break;
+      
+      // Method 4: Search for any time between 09:00 and 17:00 near race info
+      if (!departureJST) {
+        const allTimes = fullText.match(/\d{1,2}:\d{2}/g) || [];
+        for (const t of allTimes) {
+          const [h, m] = t.split(':').map(Number);
+          // R11 races are typically afternoon, 14:00-16:00
+          if (h >= 14 && h <= 16) {
+            departureJST = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+            console.log(`Found afternoon race time: ${departureJST}`);
+            break;
+          }
         }
       }
     }
@@ -191,6 +191,9 @@ async function scrapeRace(raceUrl) {
       if (distMatch2) distance = distMatch2[1] + "m";
     }
 
+    // Close the browser
+    await browser.close();
+
     return {
       date,
       venue,
@@ -216,7 +219,7 @@ async function scrapeHorses(raceUrl) {
     const raceId = extractRaceId(raceUrl);
     if (!raceId) throw new Error("Invalid netkeiba URL");
 
-    const playwright = require("playwright");
+    // playwright should already be imported at the top
     console.log("Launching Playwright browser...");
     const browser = await playwright.chromium.launch({ headless: true });
     
@@ -342,51 +345,48 @@ async function scrapeResult(raceUrl) {
     if (!raceId) throw new Error("Invalid netkeiba URL");
 
     const url = `${BASE_URL}/race/race_result.html?race_id=${raceId}`;
-    const { data } = await axios.get(url, {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-        "Accept-Language": "en-US,en;q=0.9",
-      },
-      timeout: 30000,
+
+    console.log("Launching Playwright browser for result...");
+    const browser = await playwright.chromium.launch({ headless: true });
+    const context = await browser.newContext({
+      userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
     });
+    const page = await context.newPage();
+    await page.goto(url, { waitUntil: "domcontentloaded", timeout: 30000 });
 
-    const $ = cheerio.load(data);
-
+    const data = await page.content();
+    
     // Check if results are available by looking for result table or winner info
     const hasResult = data.includes("Result_Table") || data.includes("ResultTable") || 
                       data.includes("1st") || data.includes("Winner");
     
     if (!hasResult) {
+      await browser.close();
       return { finished: false, message: "Race not finished yet" };
     }
 
     // Try to find the winner (1st place horse)
-    let winner = null;
-    
-    // Look for horse links in the result section
-    $('a[href*="/db/horse/"]').each((index, element) => {
-      if (winner) return; // Already found
-      
-      const $link = $(element);
-      const horseName = $link.text().trim();
-      
-      if (!horseName || horseName.length < 2) return;
-      if (horseName.match(/Movie|Stakes|Cup|Sho|Kinen/i)) return;
-      
-      // First valid horse in result page is usually the winner
-      winner = {
-        id: 1,
-        name: horseName,
-        odds: 0,
-      };
+    const winnerName = await page.evaluate(() => {
+      let winner = null;
+      const links = document.querySelectorAll('a[href*="/db/horse/"]');
+      for (const link of links) {
+        const hName = link.textContent.trim();
+        if (!hName || hName.length < 2) continue;
+        if (hName.match(/Movie|Stakes|Cup|Sho|Kinen/i)) continue;
+        winner = hName;
+        break; // first valid is winner
+      }
+      return winner;
     });
 
-    if (winner) {
+    await browser.close();
+
+    if (winnerName) {
       return {
         finished: true,
-        winnerId: winner.id,
-        winnerName: winner.name,
-        winOdds: winner.odds,
+        winnerId: 1, // keeping logic the same
+        winnerName: winnerName,
+        winOdds: 0,
       };
     }
 
