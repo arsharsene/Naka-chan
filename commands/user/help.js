@@ -1,4 +1,9 @@
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
+const {
+  EmbedBuilder,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+} = require("discord.js");
 const shared = require("../shared");
 
 module.exports = {
@@ -11,14 +16,14 @@ module.exports = {
     // Main Dashboard Embed - matching admin panel style
     const embed = new EmbedBuilder()
       .setColor(0x667eea)
-      .setAuthor({ 
-        name: "🐎 Naka-chan Bot", 
-        iconURL: interaction.client.user.displayAvatarURL() 
+      .setAuthor({
+        name: "🐎 Naka-chan Bot",
+        iconURL: interaction.client.user.displayAvatarURL(),
       })
       .setTitle("📖 User Dashboard")
       .setDescription(
         `Welcome back, **${interaction.user.username}**!\n` +
-        `━━━━━━━━━━━━━━━━━━━━━━━━━━━`
+          `━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
       )
       .addFields(
         {
@@ -34,10 +39,10 @@ module.exports = {
           name: "💰 Your Wallet",
           value:
             `**Balance:** 🥕 ${user.balance.toLocaleString()} carrats\n` +
-            `**Daily:** ${user.lastDaily ? "✅ Claimed" : "🎁 Available!"}\n` +
+            `**Daily:** ${user.lastDaily && Date.now() - user.lastDaily < 24 * 60 * 60 * 1000 ? "✅ Claimed" : "🎁 Available!"}\n` +
             `**Status:** 🟢 Active`,
           inline: true,
-        }
+        },
       )
       .addFields(
         {
@@ -55,10 +60,9 @@ module.exports = {
         },
         {
           name: "🎲 Simulation - Virtual Race",
-          value:
-            "`/simbet <horse> <amount>` - Simulation betting race\n",
+          value: "`/simbet <horse> <amount>` - Simulation betting race\n",
           inline: true,
-        }
+        },
       )
       .addFields(
         {
@@ -81,7 +85,7 @@ module.exports = {
             "`/help` - This dashboard\n" +
             "━━━━━━━━━━━━━━━━━━",
           inline: true,
-        }
+        },
       )
       .setThumbnail(interaction.user.displayAvatarURL({ dynamic: true }))
       .setFooter({ text: "🍀 Good luck with your bets! • Naka-chan Bot" })
@@ -100,7 +104,7 @@ module.exports = {
       new ButtonBuilder()
         .setCustomId("help_daily")
         .setLabel("🎁 Daily")
-        .setStyle(ButtonStyle.Secondary)
+        .setStyle(ButtonStyle.Secondary),
     );
 
     const row2 = new ActionRowBuilder().addComponents(
@@ -115,7 +119,7 @@ module.exports = {
       new ButtonBuilder()
         .setCustomId("help_close")
         .setLabel("❌ Close")
-        .setStyle(ButtonStyle.Danger)
+        .setStyle(ButtonStyle.Danger),
     );
 
     await interaction.reply({
