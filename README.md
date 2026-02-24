@@ -83,7 +83,7 @@ Whether you're here because you love Uma Musume, you have a gambling addiction (
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/naka-chan.git
+git clone https://github.com/arsharsene/Naka-chan.git
 
 # Navigate to project directory
 cd naka-chan
@@ -130,6 +130,35 @@ npm install discord.js dotenv canvas playwright
 
 > 📄 See `dependencies.txt` for detailed install commands and system requirements.
 
+> IF GOT ERROR ON CANVAS 
+
+```bash
+rm -rf node_modules/canvas
+```
+
+```bash
+npm install canvas
+```
+
+```bash
+apt-get install build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
+```
+
+And don't forget update using ```apt-get update```
+
+> IF GOT ERROR ON PLAYWRIGHT
+```bash
+rm -rf node_modules/playwright
+```
+```bash
+rm -rf node_modules/playwright-core
+```
+```bash
+apt install playwright
+```
+```bash
+npx playwright install-deps
+```
 ---
 
 ## 📋 Commands
